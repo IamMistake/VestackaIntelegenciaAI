@@ -145,10 +145,10 @@ def iterative_deepening_search(problem):
     :rtype: Node
     """
     for depth in range(sys.maxsize):
-        result = depth_limited_search(problem, depth)
-        if result is not 'cutoff':
-            return result
-
+        # result = depth_limited_search(problem, depth)
+        # if result is not 'cutoff':
+        #     return result
+        pass
 
 def uniform_cost_search(problem):
     """Експандирај го прво јазолот со најниска цена во пребарувачкиот граф.
