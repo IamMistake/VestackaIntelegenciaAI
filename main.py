@@ -1,5 +1,4 @@
-test = 123
-print(test)
-
-forGitHub = "https://github.com"
-print(forGitHub)
+# tmp = (0, 1, 2)
+# if 1 in tmp:
+#     tmp = list(tmp)
+#     tmp.
