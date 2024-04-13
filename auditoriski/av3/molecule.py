@@ -6,8 +6,8 @@ class Molecule(Problem):
         self.moves = {
             "Right": (1, 0),
             "Left": (-1, 0),
-            "Down": (0, 1),
-            "Up": (0, -1)
+            "Down": (0, -1),
+            "Up": (0, 1)
         }
         self.matrix = (
             (1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),

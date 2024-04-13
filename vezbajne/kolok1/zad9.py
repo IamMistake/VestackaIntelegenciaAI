@@ -425,7 +425,6 @@ def depth_limited_search(problem, limit=50):
 
     return recursive_dls(Node(problem.initial), problem, limit)
 
-
 def uniform_cost_search(problem):
     """Експандирај го прво јазолот со најниска цена во пребарувачкиот граф.
     :param problem: даден проблем
@@ -435,72 +434,59 @@ def uniform_cost_search(problem):
     """
     return graph_search(problem, PriorityQueue(min, lambda a: a.path_cost))
 
-
-class BlueMagicBalls(Problem):
-    __MOVES = {"Gore Levo": (-1, 1), "Gore Desno": (1, 1), "Dolu Levo": (-1, -1), "Dolu Desno": (1, -1),
-               "Levo": (-1, 0), "Desno": (1, 0)}
-
-    def __init__(self, initial, walls, n):
-        self.board_size = (n, n)
-        self.goal_position = (n / 2, n)
-        self.walls = walls
+class Tabla(Problem):
+    def __init__(self, initial, size):
         super().__init__(initial)
-
-    def position_deleting_ball(self, state, ball, previous_position):
-
-        for index, other_ball in enumerate(state):
-            if other_ball == previous_position:
-                continue
-
-            if other_ball == ball:
-                return index
-
-        return -1
-
-    def is_valid(self, ball):
-
-        if ball in self.walls:
-            return False
-
-        if not is_on_board(self.board_size, ball):
-            return False
-
-        return True
-
-    def move_ball(self, state, where, ball, index):
-
-        new_state = list(state)
-        new_ball = list(ball)
-        move = BlueMagicBalls.__MOVES[where]
-
-        new_ball = [new_ball[0] + move[0], new_ball[1] + move[1]]
-
-        if not self.is_valid(tuple(new_ball)):
-            return None
-
-        deleting_ball_index = self.position_deleting_ball(state, tuple(new_ball), ball)
-        if deleting_ball_index == -1:
-            return None
-
-        new_ball = [new_ball[0] + move[0], new_ball[1] + move[1]]
-        if not self.is_valid(tuple(new_ball)):
-            return None
-
-        new_state[index] = tuple(new_ball)
-        new_state.pop(deleting_ball_index)
-
-        return tuple(new_state)
+        self.size = size
 
     def successor(self, state):
-        successors_states = dict()
+        next = {}
 
-        for index, ball in enumerate(state):
-            for where in BlueMagicBalls.__MOVES:
-                new_state = self.move_ball(state, where, ball, index)
-                if new_state:
-                    successors_states[f'{where}: (x={ball[0]},y={ball[1]})'] = new_state
+        # (0, 0, 0, 1, 0, 0, 1, 1, 0)
+        # 4 % 3 !=
+        # (0, 0, 0,
+        # 1, 0, 0,
+        # 1, 1, 0)
+        for br in range(len(state)):
+            next_state = list(state)
 
-        return successors_states
+            if next_state[br] == 0:
+                next_state[br] = 1
+            else:
+                next_state[br] = 0
+
+            if self.is_valid(br - self.size):
+                if next_state[br - self.size] == 0:
+                    next_state[br - self.size] = 1
+                else:
+                    next_state[br - self.size] = 0
+
+            if self.is_valid(br + self.size):
+                if next_state[br + self.size] == 0:
+                    next_state[br + self.size] = 1
+                else:
+                    next_state[br + self.size] = 0
+
+            modul = br % self.size # OVA ZA OD DESNO
+            if modul != self.size - 1 and self.is_valid(br + 1):
+                if next_state[br + 1] == 0:
+                    next_state[br + 1] = 1
+                else:
+                    next_state[br + 1] = 0
+
+            if modul != 0 and self.is_valid(br - 1):
+                if next_state[br - 1] == 0:
+                    next_state[br - 1] = 1
+                else:
+                    next_state[br - 1] = 0
+
+            # print(next_state)
+            name = f'x: {int(br / self.size)}, y: {int(br % self.size)}'
+            # print(name, next_state)
+            next[name] = tuple(next_state)
+            # br += 1
+
+        return next
 
     def actions(self, state):
         return self.successor(state).keys()
@@ -509,36 +495,26 @@ class BlueMagicBalls(Problem):
         return self.successor(state)[action]
 
     def goal_test(self, state):
-        return len(state) == 1 and state[0] == self.goal_position
+        for i in state:
+            if i == 0:
+                return False
+        return True
 
-
-def is_on_board(board_size, entity):
-    if entity[0] < 0 or entity[1] < 0:
-        return False
-    if entity[0] > board_size[0] or entity[1] > board_size[1]:
-        return False
-
-    return True
+    def is_valid(self, br):
+        if br < 0 or br >= self.size * self.size:
+            return False
+        return True
 
 
 if __name__ == "__main__":
-    n = int(input()) - 1
-    num_balls = int(input())
-    balls = list()
-    for _ in range(num_balls):
-        ball = tuple(map(int, input().split(",")))
-        balls.append(ball)
-        print(ball)
 
-    num_walls = int(input())
-    walls = list()
-    for _ in range(num_walls):
-        wall = tuple(map(int, input().split(",")))
-        walls.append(wall)
-        print(wall)
+    size = int(input())
+    hehe = tuple(map(int, input().split(",")))
+    # print(hehe)
 
-    # problem = BlueMagicBalls(tuple(balls), tuple(walls), n)
-    # search = breadth_first_graph_search(problem)
-    # print(search)
-    # if search:
-    #     print(search.solution())
+    problem = Tabla(hehe, size)
+    res = breadth_first_graph_search(problem)
+    if res:
+        print(res.solution())
+    else:
+        print("No solution found")
